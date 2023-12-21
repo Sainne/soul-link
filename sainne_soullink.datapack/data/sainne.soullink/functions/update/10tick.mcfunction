@@ -1,5 +1,6 @@
 #damage updates
 execute as @a[team=sainne.soullink.red,scores={sainne.soullink.dmgtaken=1..}] run function sainne.soullink:damage_update/red/main
+execute as @a[team=sainne.soullink.blue,scores={sainne.soullink.dmgtaken=1..}] run function sainne.soullink:damage_update/blue/main
 
 #gapple update
 execute as @a if score @s sainne.soullink.gapple matches 1.. run function sainne.soullink:gapple_update/main
