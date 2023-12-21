@@ -1,0 +1,1 @@
+execute as @a if score @s sainne.soullink.dmgtaken matches ..0 as @a if score @s sainne.soullink.hp_diff matches ..-2 run effect give @s minecraft:regeneration 3 1 true

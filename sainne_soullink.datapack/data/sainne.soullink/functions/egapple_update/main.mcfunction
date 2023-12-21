@@ -1,0 +1,1 @@
+execute if entity @s[team=sainne.soullink.red] run function sainne.soullink:egapple_update/red
