@@ -1,4 +1,4 @@
-# Soul Link 💙--🔗--🧡
+# Soul-💙-Link
 A Minecraft datapack, about linking your soul to other players.
 # Main Mechanic 💞
 - The health from players in a team is shared between all members from that team
