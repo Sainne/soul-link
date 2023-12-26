@@ -3,7 +3,7 @@
 function load{
     scoreboard objectives add sainne.soullink.global dummy
     execute unless score installed sainne.soullink.global matches 1 run function sainne.soullink:.install
-    tellraw @a [{"text":"Soul","color": "green"},{"text":"-💙-","color":"red"},{"text":"Link","color":"yellow"},{"text":" has been reloaded!","color":"gold"}]
+    tellraw @a [{"text":"Soul","color": "green"},{"text":"-❤-","color":"red"},{"text":"Link","color":"yellow"},{"text":" has been reloaded!","color":"gold"}]
     function sainne.soullink:tick_update/1
 }
 # Initial setup commands
@@ -18,7 +18,9 @@ function .install{
     scoreboard objectives add sainne.soullink.egapple minecraft.used:minecraft.enchanted_golden_apple
     scoreboard objectives add sainne.soullink.death deathCount
     scoreboard objectives add sainne.soullink.totem_use minecraft.used:totem_of_undying
+    scoreboard objectives add sainne.soullink.members dummy
     # Adding teams prefixes and color, the arrays defined in the js block are global
+    # Teams have prefixes and colors, this can be changed in settings.
     <%%
         teams = ["red","blue","green","yellow"]
         team_names = ["🌹 Red Roses","🔥 Blue Blazes","🦢 Green Grace","🧶 Yellow Yarns"]
@@ -29,8 +31,15 @@ function .install{
             emit(`team modify sainne.soullink.${teams[i]} color ${teams[i]}`)
         }
     %%>
+    # Default settings
+    # 0(no autojoin) 1(autojoin team green) 2(autojoin lowest member team))
+    scoreboard players set auto_join sainne.soullink.global 0
+    # if auto_join enabled, ignore teams of N members in the assignation
+    scoreboard players set max_members sainne.soullink.global 2
+    # 0(do not allow 1 member teams, if a team has 1 member, its reassigned to another team) 1(allow teams of 1 member)
+    scoreboard players set allow_singles sainne.soullink.global 0
     # Initializing online players
-    # execute as @a run function sainne.soullink:as_players/first_join
+    execute as @a run function sainne.soullink:as_players/first_join
     scoreboard players set installed sainne.soullink.global 1
 }
 # Remove all scoreboards and team, making the datapack esentially useless
@@ -45,6 +54,7 @@ function .uninstall{
     scoreboard objectives remove sainne.soullink.egapple
     scoreboard objectives remove sainne.soullink.death
     scoreboard objectives remove sainne.soullink.totem_use
+    scoreboard objectives remove sainne.soullink.members
     # Removing teams
     <%%
         for (let i=0; i<teams.length; i++) {
@@ -54,7 +64,13 @@ function .uninstall{
 }
 # Settings function might delete later
 function .settings{
-    say settings test
+    tellraw @s ["\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"]
+    tellraw @s ["",{"text":"-------> ","color":"gold"},{"text":"Soul","color":"green"},{"text":"-❤-","color":"red"},{"text":"Link","color":"yellow"},{"text":" Settings <-------","color":"gold"}]
+    tellraw @s ["",{"text":"Teams colors and prefixes:","color":"gold"},"\n",{"text":"[No color & prefixes]","color":"white","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/teams_white"}},"       ",{"text":"[Teams colored with prefixes]","color":"dark_purple","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/teams_color"}}]
+    tellraw @s ["",{"text":"Auto join:","color":"gold"},"\n",{"text":"[OFF]","color":"red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/auto_join_off"}},"    ",{"text":"[Join Green]","color":"green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/auto_join_green"}},"    ",{"text":"[Join lowest]","color":"light_purple","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/auto_join_lowest"}}]
+    tellraw @s ["",{"text":"⚠","color":"red","hoverEvent":{"action":"show_text","contents":[{"text":"Only used if auto join is enabled on lowest member mode.","color":"red"},"\n"," ignores teams with this amount of members in the assignation"]}},{"text":"Ignore teams of N members:","color":"gold"},"\n",{"text":"[-]","color":"dark_red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_minus1"}},"   ",{"score":{"name":"max_members","objective":"sainne.soullink.global"},"color":"yellow"},"   ",{"text":"[+]","color":"dark_green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_plus1"}},"      ",{"text":"[RESET]","color":"light_purple","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_reset"}}]
+    tellraw @s ["",{"text":"Single teams allowed:","color":"gold","hoverEvent":{"action":"show_text","contents":[{"text":"If True, then teams with 1 member, will have their member reallocated, useful if ignoreN is 0","color":"red"}]}},"\n",{"text":"[False]","color":"red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/not_allow_singles"}},"    ",{"text":"[True]","color":"green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/allow_singles"}}]
+    tellraw @s ["",{"text":"Start and spread all online players:","color":"gold"},"\n",{"text":"[GO!>>>]","bold":true,"underlined":true,"color":"dark_red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/quick_start"},"hoverEvent":{"action":"show_text","contents":[{"text":"This will reset all recipes and advancements of all players","color":"red"},"\n",{"text":"And spread them over 2000 blocks in the world","color":"red"},"\n",{"text":"Basically a quick start button","color":"dark_red"}]}}]
 }
 # Directory of settings functions
 dir settings{
@@ -66,6 +82,8 @@ dir settings{
                 emit(`team modify sainne.soullink.${teams[i]} color ${teams[i]}`)
             }
         %%>
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
     }
     # Give all teams the color white and no prefix
     # to hide the soul links of players
@@ -76,6 +94,62 @@ dir settings{
                 emit(`team modify sainne.soullink.${teams[i]} color white`)
             }
         %%>
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function auto_join_off{
+        scoreboard players set auto_join sainne.soullink.global 0
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function auto_join_green{
+        scoreboard players set auto_join sainne.soullink.global 1
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function auto_join_lowest{
+        scoreboard players set auto_join sainne.soullink.global 2
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function number_minus1{
+        scoreboard players remove max_members sainne.soullink.global 1
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function number_plus1{
+        scoreboard players add max_members sainne.soullink.global 1
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function number_reset{
+        scoreboard players set max_members sainne.soullink.global 2
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function allow_singles{
+        scoreboard players set allow_singles sainne.soullink.global 1
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function not_allow_singles{
+        scoreboard players set allow_singles sainne.soullink.global 0
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function quick_start{
+        recipe take @a *
+        advancement revoke @a everything
+        clear @a
+        <%%
+            for (i = 0; i<teams.length; i++) {
+                emit(`team empty sainne.soullink.${teams[i]}`)
+            }
+        %%>
+        spreadplayers 0 0 20 2000 false @a
+        tellraw @a ["\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"]
+        tellraw @a ["",{"text":"All players have had their inventories,advancements and recipes cleared!","color":"dark_red"},"\n",{"text":"All players have been distributed on the map!","color":"dark_green"},"\n",{"text":"All players have been assigned new soul mates!","color":"dark_purple"}]
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
     }
 }
 # every ~2 seconds check healing updates
@@ -88,35 +162,70 @@ clock 51t{
 # divided the updates in ticks to avoid checking all health updates in one tick
 dir tick_update{
     function 1{
-        schedule function sainne.soullink:tick_update/3 2t replace
+        schedule function sainne.soullink:tick_update/2 1t replace
         #damage updates
         execute as @a if score @s sainne.soullink.dmgtaken matches 1.. run function sainne.soullink:as_players/damage_update
     }
-    function 3{
-        schedule function sainne.soullink:tick_update/5 2t replace
+    function 2{
+        schedule function sainne.soullink:tick_update/3 1t replace
         execute as @a if score @s sainne.soullink.gapple matches 1.. run function sainne.soullink:as_players/gapple_update
         execute as @a if score @s sainne.soullink.egapple matches 1.. run function sainne.soullink:as_players/egapple_update
     }
-    function 5{
-        schedule function sainne.soullink:tick_update/7 2t replace
+    function 3{
+        schedule function sainne.soullink:tick_update/4 1t replace
         execute as @a if score @s sainne.soullink.death matches 1.. run function sainne.soullink:as_players/death_update
     }
-    function 7{
-        schedule function sainne.soullink:tick_update/9 2t replace
+    function 4{
+        schedule function sainne.soullink:tick_update/5 1t replace
     }
-    function 9{
-        schedule function sainne.soullink:tick_update/11 2t replace
+    function 5{
+        schedule function sainne.soullink:tick_update/6 1t replace
         # This deals when a team dies by receiving more damage than their hp
         # and revive with totem, to avoid falsely dying
         execute as @a if score @s sainne.soullink.totem_use matches 1.. run scoreboard players set @s sainne.soullink.dmgtaken 0
         execute as @a if score @s sainne.soullink.totem_use matches 1.. run scoreboard players set @s sainne.soullink.totem_use 0
     }
-    function 11{
-        schedule function sainne.soullink:tick_update/1 10t replace
+    function 6{
+        schedule function sainne.soullink:tick_update/1 5t replace
     }
 }
 
 dir as_players{
+    # On entering the world for the first time.
+    function first_join{
+        execute as @s if score auto_join sainne.soullink.global matches 1.. run function sainne.soullink:as_players/assign_team
+        scoreboard players set @s sainne.soullink.dmgtaken 0
+        give @s minecraft:bundle
+    }
+    # On login into the world
+    function on_login{
+        tellraw @s ["",{"text":"Welcome back!","color":"gold"},"\n",{"text":"-> This world is running ","color":"gold"},{"text":"Soul","color":"green"},{"text":"-❤-","color":"red"},{"text":"Link","color":"yellow"},"\n",{"text":"Your health is connected to other players in your team","color":"gold"}]
+    }
+    # Automatically assign team
+    function assign_team{
+        # calculate the amount of members in each team
+        <%%
+            for (i = 0; i<teams.length; i++) {
+                emit(`execute store result score ${teams[i]} sainne.soullink.members run team list sainne.soullink.${teams[i]}`)
+            }
+        %%>
+        # Run the correct algorithm depending on autojoin value
+        execute if score auto_join sainne.soullink.global matches 1 run function sainne.soullink:as_players/assign_team/join_green
+        execute if score auto_join sainne.soullink.global matches 2 run function sainne.soullink:as_players/assign_team/join_lowest
+    }
+    dir assign_team{
+        function join_green{
+            team join sainne.soullink.green @s
+        }
+        function join_lowest{
+            <%%
+                for (i = 0; i<teams.length; i++) {
+                    emit(`execute if entity @s[team=] if score ${teams[i]} sainne.soullink.members < max_members sainne.soullink.global run team join sainne.soullink.${teams[i]}`)
+                }
+            %%>
+            execute if entity @s[team=] run tellraw @a ["",{"selector":"@s","color":"gold"},{"text":" has not been assigned a team, as all teams are full!","color":"dark_red"}]
+        }
+    }
     # Health computations for teams
     dir computations{
         # Estimates the highest hp of the team
@@ -156,7 +265,7 @@ dir as_players{
             }
         %%>
     }
-    # Damage detection functions
+    # Damage detection functions (if adding a team, append a function and directory respectively)
     dir damage_update{
         # Team red estimate damage interval
         function red{
@@ -827,7 +936,7 @@ dir as_players{
             }
         %%>
     }
-    # Gapple execution functions by team
+    # Gapple execution functions by team (if adding a team, append a function)
     dir gapple_update{
         function red{
             effect give @a[team=sainne.soullink.red] absorption 120 0 false
@@ -858,7 +967,7 @@ dir as_players{
             }
         %%>
     }
-    # EGaaple execution functions by team
+    # EGaaple execution functions by team (if adding a team, append a function)
     dir egapple_update{
         function red{
             effect give @a[team=sainne.soullink.red] absorption 120 3 false
@@ -897,7 +1006,7 @@ dir as_players{
             }
         %%>
     }
-    # Death execution functions by team
+    # Death execution functions by team (if adding a team, append a function)
     dir death_update{
         function red{
             kill @a[team=sainne.soullink.red]

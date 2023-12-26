@@ -7,6 +7,10 @@ A Minecraft datapack, about linking your soul to other players.
 - If a player from a team obtains absorption then all players from the team receive the effect as well
 - If a player from a team dies then all players from that team die as well.
 - To join a team and sync souls use "/team join sainne.soullink.\<color\> \<player\>"
+# How to use and play (quick start guide)
+- First use "/function sainne.soullink:.settings" ro configure your game and assign max number of players and other values.
+- Then click GO on that menu, all players will be spread out and assigned teams, and given a bundle
+- Enjoy!
 ### Technicalities 🔧
 - Since the datapack depends on events happening then disconnecting has potential for abuse, for example: a player from a team can disconnect while having max hp, and then reconnect to heal all players from their team up.
 - And also infinite regeneration is possible if a player from a team has more max hp than every other player from that team.
@@ -14,9 +18,6 @@ A Minecraft datapack, about linking your soul to other players.
 - If a player from a team has a totem and receives lethal damage, killing a teammate in the process, then they die and lose the totem, this is partially intended, since saving a team from death should cost N totems, with the totems being in the off hand of every member(if every member from the team has a totem, then they are all spent and saved).
 - Because of how regeneration works, the only possible value to heal exactly is 2hp, and 0.8hp, ended up deciding for the former for healing since health scoreboard uses int values(mojang give /heal command please and thank)
 ### Planned features 🧠
-- Automatically assign players a team
-- If there is only one team, every player that enters the world, joins that team
-- If there is more than one team, then every player that enters the world, joins the team with the least players
 - 4 more teams, making a total of 8 teams!
 # Credits and Inspiration! ✨
 This datapack is built with the help of mc-build!, go show it some love:

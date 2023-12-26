@@ -9,6 +9,7 @@ scoreboard objectives remove sainne.soullink.gapple
 scoreboard objectives remove sainne.soullink.egapple
 scoreboard objectives remove sainne.soullink.death
 scoreboard objectives remove sainne.soullink.totem_use
+scoreboard objectives remove sainne.soullink.members
 team remove sainne.soullink.red
 team remove sainne.soullink.blue
 team remove sainne.soullink.green

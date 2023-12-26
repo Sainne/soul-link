@@ -1,5 +1,4 @@
 #built using mc-build (https://github.com/mc-build/mc-build)
 
-schedule function sainne.soullink:tick_update/5 2t replace
-execute as @a if score @s sainne.soullink.gapple matches 1.. run function sainne.soullink:as_players/gapple_update
-execute as @a if score @s sainne.soullink.egapple matches 1.. run function sainne.soullink:as_players/egapple_update
+schedule function sainne.soullink:tick_update/4 1t replace
+execute as @a if score @s sainne.soullink.death matches 1.. run function sainne.soullink:as_players/death_update

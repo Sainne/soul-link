@@ -8,3 +8,5 @@ team modify sainne.soullink.green prefix {"text":"🦢 ","color":"green"}
 team modify sainne.soullink.green color green
 team modify sainne.soullink.yellow prefix {"text":"🧶 ","color":"yellow"}
 team modify sainne.soullink.yellow color yellow
+function sainne.soullink:.settings
+playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
