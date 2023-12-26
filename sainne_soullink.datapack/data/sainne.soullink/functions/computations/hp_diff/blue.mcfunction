@@ -1,2 +1,0 @@
-execute as @a[team=sainne.soullink.blue] run scoreboard players operation @s sainne.soullink.hp_diff = @s sainne.soullink.hp
-execute as @a[team=sainne.soullink.blue] run scoreboard players operation @s sainne.soullink.hp_diff -= blue sainne.soullink.highest_hp
