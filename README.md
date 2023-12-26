@@ -12,7 +12,11 @@ A Minecraft datapack, about linking your soul to other players.
 - And also infinite regeneration is possible if a player from a team has more max hp than every other player from that team.
 - And if a player has more max HP than another then it is possible to die while having still HP left, since if one player from a team dies, then every other player from that team also dies.
 - If a player from a team has a totem and receives lethal damage, killing a teammate in the process, then they die and lose the totem, this is partially intended, since saving a team from death should cost N totems, with the totems being in the off hand of every member(if every member from the team has a totem, then they are all spent and saved).
-- Because of how regeneration works, the only possible value to heal exactly is 2hp, and 0.8hp, ended up deciding for the former for healing since health scoreboard uses int values
+- Because of how regeneration works, the only possible value to heal exactly is 2hp, and 0.8hp, ended up deciding for the former for healing since health scoreboard uses int values(mojang give /heal command please and thank)
+### Planned 🧠
+- Automatically assign players a team
+- If there is only one team, every player that enters the world, joins that team
+- If there is more than one team, then every player that enters the world, joins the team with the least players
 # Credits and Inspiration! ✨
 This datapack is built with the help of mc-build!, go show it some love:
 
