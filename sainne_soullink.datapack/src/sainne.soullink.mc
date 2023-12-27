@@ -38,6 +38,10 @@ function .install{
     scoreboard players set max_members sainne.soullink.global 2
     # 0(do not allow 1 member teams, if a team has 1 member, its reassigned to another team) 1(allow teams of 1 member)
     scoreboard players set allow_singles sainne.soullink.global 0
+    # 0(respect teams when spreading) 1(do not respect teams when spreading players)
+    scoreboard players set respectTeams sainne.soullink.global 1
+    # Radius of player spread on quick start, only multiples of 250 up to 3000
+    scoreboard players set spreadRadius sainne.soullink.global 750
     # Initializing online players
     execute as @a run function sainne.soullink:as_players/first_join
     scoreboard players set installed sainne.soullink.global 1
@@ -68,8 +72,10 @@ function .settings{
     tellraw @s ["",{"text":"-------> ","color":"gold"},{"text":"Soul","color":"green"},{"text":"-❤-","color":"red"},{"text":"Link","color":"yellow"},{"text":" Settings <-------","color":"gold"}]
     tellraw @s ["",{"text":"Teams colors and prefixes:","color":"gold"},"\n",{"text":"[No color & prefixes]","color":"white","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/teams_white"}},"       ",{"text":"[Teams colored with prefixes]","color":"dark_purple","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/teams_color"}}]
     tellraw @s ["",{"text":"Auto join:","color":"gold"},"\n",{"text":"[OFF]","color":"red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/auto_join_off"}},"    ",{"text":"[Join Green]","color":"green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/auto_join_green"}},"    ",{"text":"[Join lowest]","color":"light_purple","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/auto_join_lowest"}}]
-    tellraw @s ["",{"text":"⚠","color":"red","hoverEvent":{"action":"show_text","contents":[{"text":"Only used if auto join is enabled on lowest member mode.","color":"red"},"\n"," ignores teams with this amount of members in the assignation"]}},{"text":"Ignore teams of N members:","color":"gold"},"\n",{"text":"[-]","color":"dark_red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_minus1"}},"   ",{"score":{"name":"max_members","objective":"sainne.soullink.global"},"color":"yellow"},"   ",{"text":"[+]","color":"dark_green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_plus1"}},"      ",{"text":"[RESET]","color":"light_purple","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_reset"}}]
-    tellraw @s ["",{"text":"Single teams allowed:","color":"gold","hoverEvent":{"action":"show_text","contents":[{"text":"If True, then teams with 1 member, will have their member reallocated, useful if ignoreN is 0","color":"red"}]}},"\n",{"text":"[False]","color":"red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/not_allow_singles"}},"    ",{"text":"[True]","color":"green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/allow_singles"}}]
+    tellraw @s ["",{"text":"⚠","color":"red","hoverEvent":{"action":"show_text","contents":[{"text":"Only used if auto join is enabled on lowest member mode.","color":"red"},"\n"," ignores teams with over this amount of members in the assignation"]}},{"text":"Ignore teams of over N members:","color":"gold"},"\n",{"text":"[-]","color":"dark_red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_minus1"}},"   ",{"score":{"name":"max_members","objective":"sainne.soullink.global"},"color":"yellow"},"   ",{"text":"[+]","color":"dark_green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_plus1"}},"      ",{"text":"[RESET]","color":"light_purple","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/number_reset"}}]
+    tellraw @s ["",{"text":"Quick Start RespectTeams:","color":"gold"},"\n",{"text":"[False]   ","color":"dark_red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/teams_together_false"}},{"text":"   [True]","color":"green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/teams_together_true"}}]
+    tellraw @s ["",{"text":"Quick Start SpreadRadius:","color":"gold"},"\n",{"text":"[-]   ","color":"dark_red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/radius_minus"}},{"score":{"name":"spreadRadius","objective":"sainne.soullink.global"},"color":"yellow"},{"text":"   [+]","color":"green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/radius_plus"}}]
+    # tellraw @s ["",{"text":"Single teams allowed:","color":"gold","hoverEvent":{"action":"show_text","contents":[{"text":"If True, then teams with 1 member, will have their member reallocated, useful if ignoreN is 0","color":"red"}]}},"\n",{"text":"[False]","color":"red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/not_allow_singles"}},"    ",{"text":"[True]","color":"green","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/allow_singles"}}]
     tellraw @s ["",{"text":"Start and spread all online players:","color":"gold"},"\n",{"text":"[GO!>>>]","bold":true,"underlined":true,"color":"dark_red","clickEvent":{"action":"run_command","value":"/function sainne.soullink:settings/quick_start"},"hoverEvent":{"action":"show_text","contents":[{"text":"This will reset all recipes and advancements of all players","color":"red"},"\n",{"text":"And spread them over 2000 blocks in the world","color":"red"},"\n",{"text":"Basically a quick start button","color":"dark_red"}]}}]
 }
 # Directory of settings functions
@@ -127,6 +133,26 @@ dir settings{
         function sainne.soullink:.settings
         playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
     }
+    function teams_together_true{
+        scoreboard players set respectTeams sainne.soullink.global 1
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function teams_together_false{
+        scoreboard players set respectTeams sainne.soullink.global 0
+        function sainne.soullink:.settings
+        playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function radius_minus{
+        execute if score spreadRadius sainne.soullink.global matches 251.. run scoreboard players remove spreadRadius sainne.soullink.global 250
+        function sainne.soullink:.settings
+        execute if score spreadRadius sainne.soullink.global matches 251.. run playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function radius_plus{
+        execute if score spreadRadius sainne.soullink.global matches ..2999 run scoreboard players add spreadRadius sainne.soullink.global 250
+        function sainne.soullink:.settings
+        execute if score spreadRadius sainne.soullink.global matches ..2999 run playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
     function allow_singles{
         scoreboard players set allow_singles sainne.soullink.global 1
         function sainne.soullink:.settings
@@ -146,10 +172,38 @@ dir settings{
                 emit(`team empty sainne.soullink.${teams[i]}`)
             }
         %%>
-        spreadplayers 0 0 20 2000 false @a
+        advancement grant @a[sort=random] only sainne.soullink:first_join
+        execute as @a[sort=random] run function sainne.soullink:as_players/assign_team
+        effect give @a minecraft:regeneration 5 100 true
+        effect give @a minecraft:saturation 5 100 true
+        function sainne.soullink:settings/spreadplayers
         tellraw @a ["\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"]
         tellraw @a ["",{"text":"All players have had their inventories,advancements and recipes cleared!","color":"dark_red"},"\n",{"text":"All players have been distributed on the map!","color":"dark_green"},"\n",{"text":"All players have been assigned new soul mates!","color":"dark_purple"}]
         playsound minecraft:entity.arrow.hit_player master @s ~ ~ ~ 0.2 1.6 0.2
+    }
+    function spreadplayers{
+        execute if score respectTeams sainne.soullink.global matches 1 run function sainne.soullink:settings/spreadplayers/teams_together_true
+        execute if score respectTeams sainne.soullink.global matches 0 run function sainne.soullink:settings/spreadplayers/teams_together_false
+    }
+    dir spreadplayers{
+        function teams_together_true{
+            <%%
+                const radios = [250,500,750,1000,1250,1500,1750,2000,2250,2500,2750,3000]
+                for (i = 0; i<radios.length; i++) {
+                    radio = radios[i]
+                    emit(`execute if score spreadRadius sainne.soullink.global matches ${radio} run spreadplayers 0 0 20 ${radio} true @a`)
+                }
+            %%>
+        }
+        function teams_together_false{
+            <%%
+                const radios = [250,500,750,1000,1250,1500,1750,2000,2250,2500,2750,3000]
+                for (i = 0; i<radios.length; i++) {
+                    radio = radios[i]
+                    emit(`execute if score spreadRadius sainne.soullink.global matches ${radio} run spreadplayers 0 0 20 ${radio} false @a`)
+                }
+            %%>
+        }
     }
 }
 # every ~2 seconds check healing updates
@@ -269,16 +323,22 @@ dir as_players{
     dir damage_update{
         # Team red estimate damage interval
         function red{
-            execute as @a[team=sainne.soullink.red,scores={sainne.soullink.dmgtaken=1..5}] run function sainne.soullink:as_players/damage_update/red/tkn1
             <%%
-                intervalos = [5,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
+                decimals = [1,2,3,4,5,6,7,8,9]
+                for (let i=0; i<decimals.length; i++) {
+                    emit(`execute as @a[team=sainne.soullink.red,scores={sainne.soullink.dmgtaken=${decimals[i]}}] run function sainne.soullink:as_players/damage_update/red/tkn${decimals[i]}`)
+                }
+            %%>
+            <%%
+                intervalos = [9,19,29,39,49,59,69,79,89,99,109,119,129,139,149,159,169,179,189,199]
                 for (let i=1; i<intervalos.length; i++) {
                     let inferior = intervalos[i-1] + 1
                     let superior = intervalos[i]
-                    emit(`execute as @a[team=sainne.soullink.red,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/red/tkn${superior}`)
+                    let nombre = superior - 9
+                    emit(`execute as @a[team=sainne.soullink.red,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/red/tkn${nombre}`)
                 }
             %%>
-            execute as @a[team=sainne.soullink.red,scores={sainne.soullink.dmgtaken=191..}] run function sainne.soullink:as_players/damage_update/red/tkn200
+            execute as @a[team=sainne.soullink.red,scores={sainne.soullink.dmgtaken=200..}] run function sainne.soullink:as_players/damage_update/red/tkn200
         }
         # Team red, execute damage
         dir red{
@@ -287,6 +347,62 @@ dir as_players{
                 tag @s add damager
                 scoreboard players remove @s sainne.soullink.dmgtaken 1
                 execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.1
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn2{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 2
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.2
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn3{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 3
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.3
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn4{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 4
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.4
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn5{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 5
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.5
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn6{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 6
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.6
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn7{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 7
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.7
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn8{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 8
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.8
+                execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn9{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 9
+                execute as @a[team=sainne.soullink.red,tag=!damager] run damage @s 0.9
                 execute as @a[team=sainne.soullink.red,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
                 tag @s remove damager
             }
@@ -434,13 +550,19 @@ dir as_players{
         }
         # Team blue estimate damage interval
         function blue{
-            execute as @a[team=sainne.soullink.blue,scores={sainne.soullink.dmgtaken=1..5}] run function sainne.soullink:as_players/damage_update/blue/tkn1
             <%%
-                intervalos = [5,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
+                decimals = [1,2,3,4,5,6,7,8,9]
+                for (let i=0; i<decimals.length; i++) {
+                    emit(`execute as @a[team=sainne.soullink.blue,scores={sainne.soullink.dmgtaken=${decimals[i]}}] run function sainne.soullink:as_players/damage_update/blue/tkn${decimals[i]}`)
+                }
+            %%>
+            <%%
+                intervalos = [9,19,29,39,49,59,69,79,89,99,109,119,129,139,149,159,169,179,189,199]
                 for (let i=1; i<intervalos.length; i++) {
                     let inferior = intervalos[i-1] + 1
                     let superior = intervalos[i]
-                    emit(`execute as @a[team=sainne.soullink.blue,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/blue/tkn${superior}`)
+                    let nombre = superior - 9
+                    emit(`execute as @a[team=sainne.soullink.blue,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/blue/tkn${nombre}`)
                 }
             %%>
             execute as @a[team=sainne.soullink.blue,scores={sainne.soullink.dmgtaken=191..}] run function sainne.soullink:as_players/damage_update/blue/tkn200
@@ -452,6 +574,62 @@ dir as_players{
                 tag @s add damager
                 scoreboard players remove @s sainne.soullink.dmgtaken 1
                 execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.1
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn2{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 2
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.2
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn3{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 3
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.3
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn4{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 4
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.4
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn5{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 5
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.5
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn6{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 6
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.6
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn7{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 7
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.7
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn8{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 8
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.8
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn9{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 9
+                execute as @a[team=sainne.soullink.blue,tag=!damager] run damage @s 0.9
                 execute as @a[team=sainne.soullink.blue,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
                 tag @s remove damager
             }
@@ -599,13 +777,19 @@ dir as_players{
         }
         # Team green estimate damage interval
         function green{
-            execute as @a[team=sainne.soullink.green,scores={sainne.soullink.dmgtaken=1..5}] run function sainne.soullink:as_players/damage_update/green/tkn1
             <%%
-                intervalos = [5,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
+                decimals = [1,2,3,4,5,6,7,8,9]
+                for (let i=0; i<decimals.length; i++) {
+                    emit(`execute as @a[team=sainne.soullink.green,scores={sainne.soullink.dmgtaken=${decimals[i]}}] run function sainne.soullink:as_players/damage_update/green/tkn${decimals[i]}`)
+                }
+            %%>
+            <%%
+                intervalos = [9,19,29,39,49,59,69,79,89,99,109,119,129,139,149,159,169,179,189,199]
                 for (let i=1; i<intervalos.length; i++) {
                     let inferior = intervalos[i-1] + 1
                     let superior = intervalos[i]
-                    emit(`execute as @a[team=sainne.soullink.green,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/green/tkn${superior}`)
+                    let nombre = superior - 9
+                    emit(`execute as @a[team=sainne.soullink.green,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/green/tkn${nombre}`)
                 }
             %%>
             execute as @a[team=sainne.soullink.green,scores={sainne.soullink.dmgtaken=191..}] run function sainne.soullink:as_players/damage_update/green/tkn200
@@ -617,6 +801,62 @@ dir as_players{
                 tag @s add damager
                 scoreboard players remove @s sainne.soullink.dmgtaken 1
                 execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.1
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn2{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 2
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.2
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn3{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 3
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.3
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn4{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 4
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.4
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn5{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 5
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.5
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn6{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 6
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.6
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn7{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 7
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.7
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn8{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 8
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.8
+                execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn9{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 9
+                execute as @a[team=sainne.soullink.green,tag=!damager] run damage @s 0.9
                 execute as @a[team=sainne.soullink.green,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
                 tag @s remove damager
             }
@@ -764,13 +1004,19 @@ dir as_players{
         }
         # Team yellow estimate damage interval
         function yellow{
-            execute as @a[team=sainne.soullink.yellow,scores={sainne.soullink.dmgtaken=1..5}] run function sainne.soullink:as_players/damage_update/yellow/tkn1
             <%%
-                intervalos = [5,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190]
+                decimals = [1,2,3,4,5,6,7,8,9]
+                for (let i=0; i<decimals.length; i++) {
+                    emit(`execute as @a[team=sainne.soullink.yellow,scores={sainne.soullink.dmgtaken=${decimals[i]}}] run function sainne.soullink:as_players/damage_update/yellow/tkn${decimals[i]}`)
+                }
+            %%>
+            <%%
+                intervalos = [9,19,29,39,49,59,69,79,89,99,109,119,129,139,149,159,169,179,189,199]
                 for (let i=1; i<intervalos.length; i++) {
                     let inferior = intervalos[i-1] + 1
                     let superior = intervalos[i]
-                    emit(`execute as @a[team=sainne.soullink.yellow,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/yellow/tkn${superior}`)
+                    let nombre = superior - 9
+                    emit(`execute as @a[team=sainne.soullink.yellow,scores={sainne.soullink.dmgtaken=${inferior}..${superior}}] run function sainne.soullink:as_players/damage_update/yellow/tkn${nombre}`)
                 }
             %%>
             execute as @a[team=sainne.soullink.yellow,scores={sainne.soullink.dmgtaken=191..}] run function sainne.soullink:as_players/damage_update/yellow/tkn200
@@ -782,6 +1028,62 @@ dir as_players{
                 tag @s add damager
                 scoreboard players remove @s sainne.soullink.dmgtaken 1
                 execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.1
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn2{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 2
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.2
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn3{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 3
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.3
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn4{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 4
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.4
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn5{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 5
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.5
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn6{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 6
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.6
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn7{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 7
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.7
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn8{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 8
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.8
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
+                tag @s remove damager
+            }
+            function tkn9{
+                tag @s add damager
+                scoreboard players remove @s sainne.soullink.dmgtaken 9
+                execute as @a[team=sainne.soullink.yellow,tag=!damager] run damage @s 0.9
                 execute as @a[team=sainne.soullink.yellow,tag=!damager] run scoreboard players set @s sainne.soullink.dmgtaken 0
                 tag @s remove damager
             }

@@ -25,5 +25,7 @@ team modify sainne.soullink.yellow color yellow
 scoreboard players set auto_join sainne.soullink.global 0
 scoreboard players set max_members sainne.soullink.global 2
 scoreboard players set allow_singles sainne.soullink.global 0
+scoreboard players set respectTeams sainne.soullink.global 1
+scoreboard players set spreadRadius sainne.soullink.global 750
 execute as @a run function sainne.soullink:as_players/first_join
 scoreboard players set installed sainne.soullink.global 1
