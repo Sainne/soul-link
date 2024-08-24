@@ -42,7 +42,7 @@ function .install{
     scoreboard players set respectTeams sainne.soullink.global 1
     # Radius of player spread on quick start, only multiples of 250 up to 3000
     scoreboard players set spreadRadius sainne.soullink.global 750
-    # Initializing online players
+    # Initializing all online players
     execute as @a run function sainne.soullink:as_players/first_join
     scoreboard players set installed sainne.soullink.global 1
 }

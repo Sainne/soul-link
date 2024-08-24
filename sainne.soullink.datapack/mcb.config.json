@@ -1,0 +1,7 @@
+{
+    "header": "# Made by Sainne with the help of MC-Build!\n",
+    "internalScoreboardName": "mcb.internal",
+    "eqVarScoreboardName": "mcb.eq.var",
+    "eqConstScoreboardName": "mcb.eq.const",
+    "ioThreadCount": 1
+}
