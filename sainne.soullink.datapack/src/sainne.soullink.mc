@@ -238,6 +238,7 @@ dir tick_update{
         # This deals when a team dies by receiving more damage than their hp
         # and revive with totem, to avoid falsely dying
         execute as @a if score @s sainne.soullink.totem_use matches 1.. run scoreboard players set @s sainne.soullink.dmgtaken 0
+        execute as @a if score @s sainne.soullink.totem_use matches 1.. run function sainne.soullink:as_players/totem_use
         execute as @a if score @s sainne.soullink.totem_use matches 1.. run scoreboard players set @s sainne.soullink.totem_use 0
     }
     function 6{
@@ -311,6 +312,30 @@ dir as_players{
         # a regeneration amplitude, time combination that heals that exactly
         # mojang please give /heal [player] [amount] command!
         execute if score @s sainne.soullink.hp_diff matches ..-2 run effect give @s minecraft:regeneration 3 1 true
+    }
+    # Team detection for totem used
+    # Does lethal damage to all members of a team
+    function totem_use{
+        <%%
+            for (let i=0; i<teams.length; i++) {
+                emit(`execute if entity @s[team=sainne.soullink.${teams[i]}] run function sainne.soullink:as_players/totem_use/${teams[i]}`)
+            }
+        %%>
+    }
+    # Totem use functions
+    dir totem_use{
+        function red{
+            execute as @a[team=sainne.soullink.red,scores={sainne.soullink.totem_use=..0}] run damage @s 999999999
+        }
+        function blue{
+            execute as @a[team=sainne.soullink.blue,scores={sainne.soullink.totem_use=..0}] run damage @s 999999999
+        }
+        function green{
+            execute as @a[team=sainne.soullink.green,scores={sainne.soullink.totem_use=..0}] run damage @s 999999999
+        }
+        function yellow{
+            execute as @a[team=sainne.soullink.yellow,scores={sainne.soullink.totem_use=..0}] run damage @s 999999999
+        }
     }
     # Team detection function for detecting damage
     function damage_update{

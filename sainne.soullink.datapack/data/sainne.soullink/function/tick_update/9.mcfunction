@@ -1,5 +1,5 @@
 #built using mc-build (https://github.com/mc-build/mc-build)
 
-schedule function sainne.soullink:tick_update/11 2t replace
+schedule function sainne.soullink:tick_update/1 2t replace
 execute as @a if score @s sainne.soullink.totem_use matches 1.. run scoreboard players set @s sainne.soullink.dmgtaken 0
 execute as @a if score @s sainne.soullink.totem_use matches 1.. run scoreboard players set @s sainne.soullink.totem_use 0
